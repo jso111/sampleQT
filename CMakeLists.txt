@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
 )
 
 #this is a testbranch comment
+#and the testbranch works perfectly!
 
 if (LINUX)
     list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.8.2/gcc_64")
