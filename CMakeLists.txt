@@ -22,6 +22,8 @@ set(PROJECT_SOURCES
         camerawidget.h
 )
 
+#this is a testbranch comment
+
 if (LINUX)
     list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.8.2/gcc_64")
     list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.9.0/gcc_64")
