@@ -47,28 +47,29 @@ void MainWindow::on_run_pushButton_clicked(){
         cv::Mat image3;
         image = cv::imread("C:/Users/jsogh/Dropbox/CPP/sampleQT/Wandell.jpg");
         cout<<"image.type() "<<image.type()<<endl;
+        cameraWidget->loadMat(image);
         //cout<<"MainWindow::on_run_pushButton_clicked() image: "<<image.cols<<" "<<image.rows<<" "<<image.type()<<endl;
         //cv::cvtColor(image, image1, cv::COLOR_BGR2RGB); // invert BGR to RGB
         //cameraWidget->loadMat(image);
         //cout<<"MainWindow::on_run_pushButton_clicked() image1: "<<image1.cols<<" "<<image1.rows<<" "<<image1.type()<<endl;
         cv::resize(image,image2,cv::Size(), 0.3, 0.3, cv::INTER_LINEAR);
         //cout<<"MainWindow::on_run_pushButton_clicked() image2: "<<image2.cols<<" "<<image2.rows<<" "<<image2.type()<<endl;
-        image3=image2.clone();
+        //image3=image2.clone();
         //QImage imagePlot=QImage(image3.data, image3.cols, image3.rows, QImage::Format_RGB888);
         QImage imagePlot=QImage(image3.data, image3.cols, image3.rows, QImage::Format_RGB888);
-        cout<<"MainWindow::on_run_pushButton_clicked() imagePlot: "<<imagePlot.width()<<" "<<imagePlot.height()<<endl;
+        //cout<<"MainWindow::on_run_pushButton_clicked() imagePlot: "<<imagePlot.width()<<" "<<imagePlot.height()<<endl;
  
         //cv::imshow("image",image);
         //cv::imshow("image1",image1);
         //cv::imshow("image2",image2);
-        cv::imshow("image3",image3);
+        //cv::imshow("image3",image3);
         
-        cout<<"starting to plot graphicsScene"<<endl;
+        //cout<<"starting to plot graphicsScene"<<endl;
         QPixmap pixmap;
-        if(image3.type()==CV_8UC3){
-            const uchar *qImageBuffer = (const uchar*)image3.data;
+        if(image2.type()==CV_8UC3){
+            const uchar *qImageBuffer = (const uchar*)image2.data;
             // Create QImage with same dimensions as input Mat
-            QImage img(qImageBuffer, image3.cols, image3.rows, image3.step, QImage::Format_RGB888);
+            QImage img(qImageBuffer, image2.cols, image2.rows, image2.step, QImage::Format_RGB888);
             pixmap = QPixmap::fromImage(img.rgbSwapped());
         }
         else

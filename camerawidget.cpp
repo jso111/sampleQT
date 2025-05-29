@@ -54,23 +54,35 @@ void CameraWidget::loadImage(QImage qImagePlot){
     update();
 }
 
-void CameraWidget::loadMat(cv::Mat bgr_image){
+void CameraWidget::loadMat(cv::Mat image){
     cout<<"CameraWidget::loadMat this->width(),this->height(): "<<this->width()<<" "<<this->height()<<endl;
-    cout<<"CameraWidget::loadMat bgr_image.cols,bgr_image.rows: "<<bgr_image.cols<<" "<<bgr_image.rows<<endl;
-    //cv::Mat rgb_image;
-    //cv::cvtColor(bgr_image, rgb_image, cv::COLOR_BGR2RGB);
-    //cout<<"CameraWidget::loadMat rgb_image.cols,bgr_image.rows: "<<rgb_image.cols<<" "<<rgb_image.rows<<endl;
-    //QImage imagePlot1=QImage(rgb_image.data, rgb_image.cols, rgb_image.rows, QImage::Format_RGB32);
-    //cout<<"CameraWidget::loadMat imagePlot1.width(),imagePlot1.height(): "<<imagePlot1.width()<<" "<<imagePlot1.height()<<endl;
-    //imagePlot=imagePlot1.scaled(this->width(),this->height(),Qt::KeepAspectRatio,Qt::FastTransformation); // scale image to the window
-    cv::Mat bgr_image1;
-    //cv::resize(bgr_image,bgr_image1,cv::Size(), 0.7, 0.7, cv::INTER_LINEAR);
-    cv::resize(bgr_image,bgr_image1,cv::Size(bgr_image.cols*0.7,bgr_image.rows*0.7),0,0, cv::INTER_LINEAR);
-    cout<<"CameraWidget::loadMat bgr_image1.cols,bgr_image1.rows: "<<bgr_image1.cols<<" "<<bgr_image1.rows<<endl;
+    cv::Mat image1;
+    cv::Mat image2;
+    cv::resize(image,image1,cv::Size(), 0.3, 0.3, cv::INTER_LINEAR);
+    cout<<"starting to convert to QImage"<<endl;
+    //QPixmap pixmap;
+    if(image1.type()==CV_8UC3){
+        cout<<"starting to convert to QImage1"<<endl;
+        const uchar *qImageBuffer = (const uchar*)image1.data;
+        cout<<"starting to convert to QImage2"<<endl;
+        QImage img(qImageBuffer, image1.cols, image1.rows, image1.step, QImage::Format_RGB888);
+        cout<<"starting to convert to QImage3"<<endl;
+        imagePlot=img.rgbSwapped();
+        cout<<"starting to convert to QImage4"<<endl;
+        //pixmap = QPixmap::fromImage(img.rgbSwapped());
+    }
+    elsevo
+    {
+        qDebug() << "ERROR: Mat could not be converted to QImage.";
+        return;
+    }
+
+    //ui->camera_label->setPixmap(pixmap);
+    //ui->camera_label->setScaledContents(true);
 
 
-    imagePlot=QImage(bgr_image1.data, bgr_image1.cols, bgr_image1.rows, QImage::Format_RGB888);
-    cout<<"CameraWidget::loadMat imagePlot.width(),imagePlot.height(): "<<imagePlot.width()<<" "<<imagePlot.height()<<endl;
+    //imagePlot=QImage(bgr_image1.data, bgr_image1.cols, bgr_image1.rows, QImage::Format_RGB888);
+    //cout<<"CameraWidget::loadMat imagePlot.width(),imagePlot.height(): "<<imagePlot.width()<<" "<<imagePlot.height()<<endl;
     
     update();
 
