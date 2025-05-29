@@ -13,6 +13,41 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Vulkan REQUIRED)
 message("Vulkan_INCLUDE_DIRS: ${Vulkan_INCLUDE_DIRS}")
 
+set(PROJECT_SOURCES
+        main.cpp
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui
+        camerawidget.cpp 
+        camerawidget.h
+)
+
+if (LINUX)
+    list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.8.2/gcc_64")
+    list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.9.0/gcc_64")
+    list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.10.0/gcc_64")
+    list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.8.0/gcc_64")
+    list(APPEND CMAKE_PREFIX_PATH "/HDF_Group/HDF5/1.14.5")
+    find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
+    find_package(OpenCV REQUIRED)
+    qt_add_executable(sampleQT
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+    )
+    target_link_libraries(sampleQT PUBLIC
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Charts
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt6::PrintSupport
+        Qt6::Multimedia
+        Qt6::MultimediaWidgets
+        ${OpenCV_LIBS}
+    )
+    target_include_directories(sampleQT PUBLIC
+                            "${PROJECT_BINARY_DIR}"
+                            "${PROJECT_SOURCE_DIR}"
+                            )
+endif ()
 
 if (WIN32)
     add_compile_definitions(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
@@ -37,31 +72,24 @@ if (WIN32)
     message("OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
     message("OpenCV_LIB_DIR: ${OpenCV_LIB_DIR}")   
     message("OpenCV_DIR: ${OpenCV_DIR}")   
-
+    qt_add_executable(cvib3 ${PROJECT_SOURCES})
 endif()
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
+find_package(Qt6 6 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
 message("Qt6_DIR: ${Qt6_DIR}")
 message("Qt6_VERSION: ${Qt6_VERSION}")
 message("Qt6_VERSION_MAJOR: ${Qt6_VERSION_MAJOR}")  
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        camerawidget.cpp 
-        camerawidget.h
-)
+
 qt_standard_project_setup()
-qt_add_executable(sampleQT ${PROJECT_SOURCES})
 MESSAGE("MSVC: ${MSVC}")
 if(MSVC)
     if(NOT STATIC_DEPS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_link_options(sampleQT PUBLIC /nodefaultlib:LIBCMT.lib /nodefaultlib:LIBCMTd.lib)
     endif()
+    
 endif()
-
+qt_add_executable(sampleQT ${PROJECT_SOURCES})
 target_link_libraries(sampleQT PRIVATE 
         Qt6::Widgets
         Qt6::Charts
