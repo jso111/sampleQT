@@ -1,81 +1,109 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.29)
 
 project(sampleQT VERSION 0.1 LANGUAGES CXX)
-
+set(CMAKE_FIND_DEBUG_MODE FALSE)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+add_definitions(-w)
+add_compile_options(-w)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Vulkan REQUIRED)
+message("Vulkan_INCLUDE_DIRS: ${Vulkan_INCLUDE_DIRS}")
+
 
 if (WIN32)
-    find_package(Vulkan REQUIRED)
+    add_compile_definitions(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
     add_compile_definitions(_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
+    
     list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.0/msvc2022_64")
     list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.1/msvc2022_64")
     list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.2/msvc2022_64")
     list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.9.0/msvc2022_64")
-    #list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.10.0/msvc2022_64")
+    list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.10.0/msvc2022_64")
+
+    include_directories(${Vulkan_INCLUDE_DIRS})
+    list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.2/msvc2022_64")
+    list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.2/msvc2022_64/bin")
+    include_directories("C:/Qt/6.8.2/msvc2022_64/bin")
+
+    list(APPEND CMAKE_PREFIX_PATH "C:/opencv/build")
+    find_package(OpenCV REQUIRED)
+    message("OpenCV_LIBS: ${OpenCV_LIBS}")
+    message("OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+    message("OpenCV_LIB_DIR: ${OpenCV_LIB_DIR}")   
+    message("OpenCV_DIR: ${OpenCV_DIR}")   
+
 endif()
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
+message("Qt6_DIR: ${Qt6_DIR}")
+message("Qt6_VERSION: ${Qt6_VERSION}")
+message("Qt6_VERSION_MAJOR: ${Qt6_VERSION_MAJOR}")  
 
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
+        camerawidget.cpp 
+        camerawidget.h
 )
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(sampleQT
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET sampleQT APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(sampleQT SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(sampleQT
-            ${PROJECT_SOURCES}
-        )
+qt_standard_project_setup()
+qt_add_executable(sampleQT ${PROJECT_SOURCES})
+MESSAGE("MSVC: ${MSVC}")
+if(MSVC)
+    if(NOT STATIC_DEPS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_link_options(sampleQT PUBLIC /nodefaultlib:LIBCMT.lib /nodefaultlib:LIBCMTd.lib)
     endif()
 endif()
 
-target_link_libraries(sampleQT PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.sampleQT)
-endif()
+target_link_libraries(sampleQT PRIVATE 
+        Qt6::Widgets
+        Qt6::Charts
+        Qt6::Gui
+        Qt6::PrintSupport
+        Qt6::Multimedia
+        Qt6::MultimediaWidgets
+        ${Vulkan_LIBRARIES}
+        ${OpenCV_LIBS}
+        )
+include(CPack)
+include(GNUInstallDirs)
 set_target_properties(sampleQT PROPERTIES
     ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-include(GNUInstallDirs)
+
 install(TARGETS sampleQT
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+qt_generate_deploy_app_script(
+    TARGET sampleQT
+    OUTPUT_SCRIPT deployApp
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+SET(BIN_DBG ${CMAKE_CURRENT_BINARY_DIR}/Debug)
+SET(BIN_REL ${CMAKE_CURRENT_BINARY_DIR}/Release)
+
+if (WIN32)
+    ADD_CUSTOM_COMMAND(
+    TARGET sampleQT
+    POST_BUILD 
+    COMMAND
+        CD $<$<CONFIG:Debug>:${BIN_DBG}>$<$<CONFIG:Release>:${BIN_REL}> &&
+        ${WINDEPLOYQT_EXECUTABLE} --pdb sampleQT.exe
+        --verbose 1 --dir . --plugindir plugins --compiler-runtime
+        )
+    message("WINDEPLOYQT_EXECUTABLE: ${WINDEPLOYQT_EXECUTABLE}")
+endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(sampleQT)
