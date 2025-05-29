@@ -71,7 +71,7 @@ void CameraWidget::loadMat(cv::Mat image){
         cout<<"starting to convert to QImage4"<<endl;
         //pixmap = QPixmap::fromImage(img.rgbSwapped());
     }
-    elsevo
+    else
     {
         qDebug() << "ERROR: Mat could not be converted to QImage.";
         return;
