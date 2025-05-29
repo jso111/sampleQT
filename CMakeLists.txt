@@ -33,7 +33,7 @@ if (LINUX)
     list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.10.0/gcc_64")
     list(APPEND CMAKE_PREFIX_PATH "/opt/Qt/6.8.0/gcc_64")
     list(APPEND CMAKE_PREFIX_PATH "/HDF_Group/HDF5/1.14.5")
-    find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
+    find_package(Qt6 6 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
     find_package(OpenCV REQUIRED)
     qt_add_executable(sampleQT
         MANUAL_FINALIZATION
@@ -77,42 +77,38 @@ if (WIN32)
     message("OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
     message("OpenCV_LIB_DIR: ${OpenCV_LIB_DIR}")   
     message("OpenCV_DIR: ${OpenCV_DIR}")   
-    qt_add_executable(cvib3 ${PROJECT_SOURCES})
+    find_package(Qt6 6 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
+    qt_standard_project_setup()
+    qt_add_executable(sampleQT ${PROJECT_SOURCES})
+    MESSAGE("MSVC: ${MSVC}")
+    if(MSVC)
+        if(NOT STATIC_DEPS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+            target_link_options(sampleQT PUBLIC /nodefaultlib:LIBCMT.lib /nodefaultlib:LIBCMTd.lib)
+        endif()
+        
+    endif()
+    target_link_libraries(sampleQT PRIVATE 
+            Qt6::Widgets
+            Qt6::Charts
+            Qt6::Gui
+            Qt6::PrintSupport
+            Qt6::Multimedia
+            Qt6::MultimediaWidgets
+            ${Vulkan_LIBRARIES}
+            ${OpenCV_LIBS}
+            )
 endif()
 
-find_package(Qt6 6 REQUIRED COMPONENTS Core Widgets Gui Charts Multimedia MultimediaWidgets PrintSupport)
 message("Qt6_DIR: ${Qt6_DIR}")
 message("Qt6_VERSION: ${Qt6_VERSION}")
 message("Qt6_VERSION_MAJOR: ${Qt6_VERSION_MAJOR}")  
 
-
-qt_standard_project_setup()
-MESSAGE("MSVC: ${MSVC}")
-if(MSVC)
-    if(NOT STATIC_DEPS OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_link_options(sampleQT PUBLIC /nodefaultlib:LIBCMT.lib /nodefaultlib:LIBCMTd.lib)
-    endif()
-    
-endif()
-qt_add_executable(sampleQT ${PROJECT_SOURCES})
-target_link_libraries(sampleQT PRIVATE 
-        Qt6::Widgets
-        Qt6::Charts
-        Qt6::Gui
-        Qt6::PrintSupport
-        Qt6::Multimedia
-        Qt6::MultimediaWidgets
-        ${Vulkan_LIBRARIES}
-        ${OpenCV_LIBS}
-        )
 include(CPack)
 include(GNUInstallDirs)
 set_target_properties(sampleQT PROPERTIES
     ${BUNDLE_ID_OPTION}
     WIN32_EXECUTABLE TRUE
 )
-
-
 install(TARGETS sampleQT
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

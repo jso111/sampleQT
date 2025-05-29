@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>241</width>
-      <height>81</height>
+      <width>61</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
@@ -31,9 +31,9 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>220</y>
-      <width>541</width>
-      <height>331</height>
+      <y>340</y>
+      <width>341</width>
+      <height>211</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="camera_gridLayout"/>
@@ -59,6 +59,19 @@
       <width>411</width>
       <height>211</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="camera_label">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>330</y>
+      <width>321</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>
